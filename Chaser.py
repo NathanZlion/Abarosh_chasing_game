@@ -3,9 +3,9 @@ from player import Player
 
 
 class Chaser(Player):
-    def __init__(self, game, position, color, speed):
+    def __init__(self, game, color, speed):
         self.game = game
-        super().__init__(position, color, speed, game)
+        super().__init__( color = color,speed =  speed, game = game, position = CHASER_INITIAL_POSITION)
         pass
 
     def move(self):

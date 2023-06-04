@@ -5,7 +5,8 @@ from utils import *
 
 class Player:
     def __init__(self, position, color, speed, game):
-        self.position = position
+        self.initial_position = position or CHASER_INITIAL_POSITION
+        self.position = self.initial_position
         self.color = color
         self.speed = speed
         self.direction = UP
@@ -56,6 +57,10 @@ class Player:
         elif self.direction == RIGHT:
             pygame.draw.circle(screen, GREEN, (self.position[0] + 5, self.position[1] - 5), 2)
             pygame.draw.circle(screen, GREEN, (self.position[0] + 5, self.position[1] + 5), 2)
-        
+    
+    def get_rect(self):
+        return pygame.Rect(self.position[0] - 10, self.position[1] - 10, 20, 20)
 
-
+    def reset_position(self):
+        self.position = self.initial_position
+        self.direction = UP

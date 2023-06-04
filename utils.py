@@ -10,6 +10,7 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 GREY = (128, 128, 128)
 BROWN = (165, 42, 42)
+WHITE = (255, 255, 255)
 ## speeds
 CHASER_SPEED = 10
 CHASED_SPEED = 8
