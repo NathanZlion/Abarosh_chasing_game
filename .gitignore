@@ -1,6 +1,13 @@
-
-
-
 __pycache__/    # Python bytecode (compiled Python code)
-
-
+# for vscode files
+.vscode/
+# for pycharm files
+.idea/
+# for jupyter notebook files
+.ipynb_checkpoints/
+# for python virtual environment
+venv/
+# for python package files
+dist/
+build/
+*.egg-info/
