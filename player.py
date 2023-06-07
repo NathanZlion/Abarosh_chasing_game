@@ -29,6 +29,10 @@ class Player:
         # checks for obstacles
         for obstacle in self.game.obstacles:
             if obstacle.collidepoint(nextPosition):
+                # play bump sound and don't allow playing the sound for about 1 second
+                bump_sound.play()
+
+
                 return False
 
         # checks for the screen boundaries

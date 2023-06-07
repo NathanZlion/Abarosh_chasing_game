@@ -19,12 +19,12 @@ class Chaser(Player):
             self.position = nextPosition
 
     def canMove(self, nextPosition):
-        # if the super() canMove() returns false, then the player is trying to move into an obstacle
         if not super().canMove(nextPosition):
             return False
 
         for safe_zone in self.game.safe_zones:
             if safe_zone.collidepoint(nextPosition):
+                pygame.mixer.Sound.play(barrel_collision_sound)
                 return False
         return True
 

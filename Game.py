@@ -4,6 +4,9 @@ from Chaser import Chaser
 from player import Player
 from utils import *
 
+# import sounds from pygame
+from pygame import mixer
+
 
 class Game:
     def __init__(self):
@@ -20,30 +23,20 @@ class Game:
         self.splash_animation_frames = []
         self.load_splash_animation_frames()  # Load animation frames
 
-        self.CHASER = Chaser(
-            game=self,
-            color=RED,
-            speed=CHASER_SPEED,
-        )
-
-        self.CHASED = Player(
-            game=self,
-            position=CHASED_INITIAL_POSITION,
-            color=BLUE,
-            speed=CHASED_SPEED,
-        )
+        # creating the players
+        self.CHASER = Chaser(game=self, color=RED, speed=CHASER_SPEED)
+        self.CHASED = Player(game=self, position=CHASED_INITIAL_POSITION, color=BLUE, speed=CHASED_SPEED)
 
         self.safe_zones = [
             pygame.Rect(0, 0, 150, 150),
             pygame.Rect(0, 450, 150, 150),
             pygame.Rect(650, 0, 150, 150),
-            pygame.Rect(650, 450, 150, 150),
+            pygame.Rect(650, 450, 150, 150)
         ]
 
         self.obstacles = [
             pygame.Rect(100, 300, 50, 50),
             pygame.Rect(100, 400, 50, 50),
-            # pygame.Rect(200, 100, 50, 50),
             pygame.Rect(200, 200, 50, 50),
             pygame.Rect(200, 300, 50, 50),
             pygame.Rect(200, 400, 50, 50),
@@ -59,15 +52,13 @@ class Game:
             pygame.Rect(500, 200, 50, 50),
             pygame.Rect(500, 300, 50, 50),
             pygame.Rect(500, 400, 50, 50),
-            # pygame.Rect(600, 100, 50, 50),
             pygame.Rect(600, 200, 50, 50),
             pygame.Rect(600, 300, 50, 50),
-            # pygame.Rect(600, 400, 50, 50),
-            # pygame.Rect(700, 100, 50, 50),
-            # pygame.Rect(700, 200, 50, 50),
-            # pygame.Rect(700, 300, 50, 50),
-            # pygame.Rect(700, 400, 50, 50),
         ]
+
+        # play game_music
+        mixer.music.load("./sounds/conga_loop.mp3")
+        mixer.music.play(-1)
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -76,17 +67,17 @@ class Game:
 
         keys_pressed = pygame.key.get_pressed()
         if keys_pressed[K_w]:
-            self.CHASER.move()
-        if keys_pressed[K_a]:
-            self.CHASER.rotate("left")
-        if keys_pressed[K_d]:
-            self.CHASER.rotate("right")
-        if keys_pressed[K_UP]:
             self.CHASED.move()
-        if keys_pressed[K_LEFT]:
+        if keys_pressed[K_a]:
             self.CHASED.rotate("left")
-        if keys_pressed[K_RIGHT]:
+        if keys_pressed[K_d]:
             self.CHASED.rotate("right")
+        if keys_pressed[K_UP]:
+            self.CHASER.move()
+        if keys_pressed[K_LEFT]:
+            self.CHASER.rotate("left")
+        if keys_pressed[K_RIGHT]:
+            self.CHASER.rotate("right")
 
     def check_collisions(self):
         chaser_rect = self.CHASER.get_rect()
@@ -96,11 +87,13 @@ class Game:
             self.chaser_score += 1
             self.CHASER.reset_position()
             self.CHASED.reset_position()
+            self.load_winner(chaser_won = True)
 
         goal_safe_zone = self.safe_zones[-1]
         if chased_rect.colliderect(goal_safe_zone):
             self.chased_score += 1
             self.CHASED.reset_position()
+            self.load_winner(chaser_won = False)
 
     def draw(self):
         self.screen.fill((0, 0, 0))  # Clear screen
@@ -126,6 +119,9 @@ class Game:
         pygame.display.flip()
 
     def load_splash_animation_frames(self):
+        # play music
+        loading_sound.play()
+
         for i in range(0, 14):
             if i < 10:
                 i = f"0{i}"
@@ -181,4 +177,20 @@ class Game:
             # Limit frame rate
             self.clock.tick(10)
 
+        pygame.mixer.music.stop()
         pygame.quit()
+
+    def load_winner(self, chaser_won = True):
+
+        # Display winner text
+        font = pygame.font.SysFont("comic", 72)
+        text = "Chaser Wins!" if chaser_won else "Chased Wins!"
+        text_rect = font.render(text, True, WHITE).get_rect()
+        text_rect.center = self.screen.get_rect().center
+        
+        pygame.display.flip()
+        pygame.mixer.music.load("./sounds/truimpth.mp3")
+        pygame.mixer.music.play(start = 0.0)
+        pygame.time.wait(4000)
+        mixer.music.load("./sounds/conga_loop.mp3")
+        mixer.music.play(-1)
