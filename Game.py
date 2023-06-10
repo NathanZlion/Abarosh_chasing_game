@@ -99,9 +99,9 @@ class Game:
 
         while self.splash_screen:
             for event in pygame.event.get():
-                pass # take no controls from the user while the splash screen is running
-
-            self.screen.fill((0, 0, 0))  # Clear screen
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
 
             # Display animation frame
             self.screen.blit(self.splash_animation_frames[frame_index], (0, 0))
@@ -173,7 +173,7 @@ class Game:
         self.CHASER.draw(self.screen)
         self.__draw_player_shadow(self.CHASED)
         self.CHASED.draw(self.screen)
-        
+
         # show trees / obstacles
         self.__draw_obstacles()
         self.__draw_bottom_fence()
@@ -271,7 +271,3 @@ class Game:
         shadow = pygame.Surface((shadow_radius * 2, shadow_radius * 2), pygame.SRCALPHA)
         pygame.draw.circle(shadow, (0, 0, 0, 100), (shadow_radius, shadow_radius), shadow_radius)
         self.screen.blit(shadow, (player.position[0] - shadow_radius, player.position[1] - shadow_radius))
-
-if __name__ == "__main__":
-    game : Game = Game()
-    game.run()
