@@ -3,8 +3,6 @@ from pygame.locals import *
 from Chaser import Chaser
 from player import Player
 from utils import *
-
-# import sounds from pygame
 from pygame import mixer
 
 
@@ -27,35 +25,6 @@ class Game:
         self.CHASER = Chaser(game=self, color=RED, speed=CHASER_SPEED)
         self.CHASED = Player(game=self, position=CHASED_INITIAL_POSITION, color=BLUE, speed=CHASED_SPEED)
 
-        self.safe_zones = [
-            pygame.Rect(0, 0, 150, 150),
-            pygame.Rect(0, 450, 150, 150),
-            pygame.Rect(650, 0, 150, 150),
-            pygame.Rect(650, 450, 150, 150)
-        ]
-
-        self.obstacles = [
-            pygame.Rect(100, 300, 50, 50),
-            pygame.Rect(100, 400, 50, 50),
-            pygame.Rect(200, 200, 50, 50),
-            pygame.Rect(200, 300, 50, 50),
-            pygame.Rect(200, 400, 50, 50),
-            pygame.Rect(300, 100, 50, 50),
-            pygame.Rect(300, 200, 50, 50),
-            pygame.Rect(300, 300, 50, 50),
-            pygame.Rect(300, 400, 50, 50),
-            pygame.Rect(400, 100, 50, 50),
-            pygame.Rect(400, 200, 50, 50),
-            pygame.Rect(400, 300, 50, 50),
-            pygame.Rect(400, 400, 50, 50),
-            pygame.Rect(500, 100, 50, 50),
-            pygame.Rect(500, 200, 50, 50),
-            pygame.Rect(500, 300, 50, 50),
-            pygame.Rect(500, 400, 50, 50),
-            pygame.Rect(600, 200, 50, 50),
-            pygame.Rect(600, 300, 50, 50),
-        ]
-
         # play game_music
         mixer.music.load("./sounds/conga_loop.mp3")
         mixer.music.play(-1)
@@ -65,19 +34,24 @@ class Game:
             if event.type == QUIT:
                 self.is_running = False
 
-        keys_pressed = pygame.key.get_pressed()
+            if event.type == KEYDOWN:
+                if event.key == pygame.K_a:
+                    self.CHASED.rotate("left")
+
+                if event.key == pygame.K_d:
+                    self.CHASED.rotate("right")
+
+                if event.key == pygame.K_LEFT:
+                    self.CHASER.rotate("left")
+
+                if event.key == pygame.K_RIGHT:
+                    self.CHASER.rotate("right")
+
+        keys_pressed = pygame.key.get_pressed()  # for continuously pressed keys
         if keys_pressed[K_w]:
             self.CHASED.move()
-        if keys_pressed[K_a]:
-            self.CHASED.rotate("left")
-        if keys_pressed[K_d]:
-            self.CHASED.rotate("right")
         if keys_pressed[K_UP]:
             self.CHASER.move()
-        if keys_pressed[K_LEFT]:
-            self.CHASER.rotate("left")
-        if keys_pressed[K_RIGHT]:
-            self.CHASER.rotate("right")
 
     def check_collisions(self):
         chaser_rect = self.CHASER.get_rect()
@@ -87,36 +61,13 @@ class Game:
             self.chaser_score += 1
             self.CHASER.reset_position()
             self.CHASED.reset_position()
-            self.load_winner(chaser_won = True)
+            self.load_winner(chaser_won=True)
 
-        goal_safe_zone = self.safe_zones[-1]
+        goal_safe_zone = safe_zones[-1]
         if chased_rect.colliderect(goal_safe_zone):
             self.chased_score += 1
             self.CHASED.reset_position()
-            self.load_winner(chaser_won = False)
-
-    def draw(self):
-        self.screen.fill((0, 0, 0))  # Clear screen
-        for safe_zone in self.safe_zones:
-            pygame.draw.rect(self.screen, GREEN, safe_zone)
-        self.CHASER.draw(self.screen)
-        self.CHASED.draw(self.screen)
-        for obstacle in self.obstacles:
-            # draw the obstacles so that they look like trees
-            pygame.draw.rect(self.screen, BROWN, obstacle, 0, 20, 20, 20, 20)
-
-        # Display scores
-        font = pygame.font.SysFont("None", 36)
-        chaser_score_text = font.render(
-            f"Chaser Score: {self.chaser_score}", True, WHITE
-        )
-        chased_score_text = font.render(
-            f"Chased Score: {self.chased_score}", True, WHITE
-        )
-        self.screen.blit(chaser_score_text, (10, 10))
-        self.screen.blit(chased_score_text, (10, 50))
-
-        pygame.display.flip()
+            self.load_winner(chaser_won=False)
 
     def load_splash_animation_frames(self):
         # play music
@@ -127,7 +78,10 @@ class Game:
                 i = f"0{i}"
 
             frame = pygame.transform.scale(
-                pygame.image.load(f"./images/splash{i}.png").convert_alpha(), (800, 600)
+                pygame.image.load(
+                    f"./images/splash_images/splash{i}.png"
+                ).convert_alpha(),
+                (800, 600),
             )
             self.splash_animation_frames.append(frame)
 
@@ -180,17 +134,75 @@ class Game:
         pygame.mixer.music.stop()
         pygame.quit()
 
-    def load_winner(self, chaser_won = True):
-
+    def load_winner(self, chaser_won=True):
         # Display winner text
         font = pygame.font.SysFont("comic", 72)
         text = "Chaser Wins!" if chaser_won else "Chased Wins!"
-        text_rect = font.render(text, True, WHITE).get_rect()
-        text_rect.center = self.screen.get_rect().center
-        
+        text_rect = font.render(text, True, BLUE)
+        text_rect_rectangle = pygame.Rect(0, 0, 0, 0)
+        text_rect_rectangle.center = self.screen.get_rect().center
+
+        # Display winner text
+        self.screen.blit(text_rect, text_rect_rectangle)
+
         pygame.display.flip()
         pygame.mixer.music.load("./sounds/truimpth.mp3")
-        pygame.mixer.music.play(start = 0.0)
+        pygame.mixer.music.play(start=0.0)
         pygame.time.wait(4000)
         mixer.music.load("./sounds/conga_loop.mp3")
         mixer.music.play(-1)
+
+    def draw(self):
+        self.screen.fill((0, 0, 0)) # a fallback color
+        # self.screen.blit(pygame.transform.scale(pygame.image.load("./images/background_field.jpg"), (800, 600)), (0, 0))
+        self.screen.blit(pygame.transform.scale(field, (800, 600)),(0, 0))
+        self.__draw_top_fence()
+        for safe_zone in safe_zones:
+            pygame.draw.rect(self.screen, GREEN, safe_zone)
+            self.screen.blit(pygame.transform.scale( house, (100, 100)),(safe_zone.x, safe_zone.y))
+
+        self.__draw_side_fence()
+        self.CHASER.draw(self.screen)
+        self.CHASED.draw(self.screen)
+
+        # show trees / obstacles
+        self.__draw_obstacles()
+        self.__draw_bottom_fence()
+        self.__dispay_score()
+
+        pygame.display.flip()
+
+    def __draw_top_fence(self):
+        # around the top and bottom
+        for i in range(0, 800 - right_offset, fence_gap):
+            self.screen.blit(pygame.transform.scale(fence_wood, (50, 50)),(i, 0))
+
+    def __draw_side_fence(self):
+        # aroung the sides
+        for i in range(0, 600, fence_gap):
+            self.screen.blit(pygame.transform.scale(fence_wood, (50, 50)),(0, i))
+            self.screen.blit(pygame.transform.scale(fence_wood, (50, 50)),(750, i))
+    
+    def __draw_bottom_fence(self):
+        for i in range(0, 800 - right_offset, fence_gap):
+            self.screen.blit(pygame.transform.scale(fence_wood, (50, 50)),(i, 550))
+
+
+    def __dispay_score(self):
+        # Display scores
+        font = pygame.font.SysFont("Comic Sans", 36)
+        chaser_score_text = font.render(f"Chaser Score: {self.chaser_score}", True, WHITE)
+        chased_score_text = font.render(f"Chased Score: {self.chased_score}", True, WHITE)
+        self.screen.blit(chaser_score_text, (10, 10))
+        self.screen.blit(chased_score_text, (10, 50))
+
+
+    def __draw_obstacles(self):
+        for circular_obstacle in obstacles:
+            pygame.draw.circle(self.screen, shade, circular_obstacle.center, 25)
+            self.screen.blit(pygame.transform.scale(tree, (60, 80)), (circular_obstacle.centerx - 35, circular_obstacle.centery - 60))
+
+
+if __name__ == "__main__":
+    game : Game = Game()
+    game.run()

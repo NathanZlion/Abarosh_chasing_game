@@ -15,14 +15,14 @@ class Chaser(Player):
             self.position[1] + self.speed * self.direction[1],
         )
 
-        if self.canMove(nextPosition) and self.isInbound(nextPosition):
+        if self.canMove(nextPosition) and super().isInbound(nextPosition):
             self.position = nextPosition
 
     def canMove(self, nextPosition):
         if not super().canMove(nextPosition):
             return False
 
-        for safe_zone in self.game.safe_zones:
+        for safe_zone in safe_zones:
             if safe_zone.collidepoint(nextPosition):
                 pygame.mixer.Sound.play(barrel_collision_sound)
                 return False

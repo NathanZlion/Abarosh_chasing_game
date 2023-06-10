@@ -1,5 +1,4 @@
 import pygame
-
 from utils import *
 
 
@@ -23,16 +22,14 @@ class Player:
     
 
     def isInbound(self, position):
-        return 0 <= position[0] <= self.game.WIDTH and 0 <= position[1] <= self.game.HEIGHT
+        offset = 20
+        return left_offset <= position[0] <= self.game.WIDTH - right_offset and top_offset <= position[1] <= self.game.HEIGHT - bottom_offset
     
     def canMove(self, nextPosition):
         # checks for obstacles
-        for obstacle in self.game.obstacles:
+        for obstacle in obstacles:
             if obstacle.collidepoint(nextPosition):
-                # play bump sound and don't allow playing the sound for about 1 second
                 bump_sound.play()
-
-
                 return False
 
         # checks for the screen boundaries
