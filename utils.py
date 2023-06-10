@@ -47,6 +47,16 @@ tree = pygame.image.load("./images/tree.png")
 house = pygame.image.load("./images/house.png")
 fence_wood = pygame.image.load("./images/one_fence.png")
 field = pygame.image.load("./images/grass_field.png")
+goal = pygame.image.load("./images/target.png")
+char1_left = pygame.transform.scale(pygame.image.load("./images/char1_left.png"), (50,50))
+char1_right = pygame.transform.scale(pygame.image.load("./images/char1_right.png"), (50,50))
+char1_up = pygame.transform.scale(pygame.image.load("./images/char1_up.png"), (50,50))
+char1_down = pygame.transform.scale(pygame.image.load("./images/char1_down.png"), (50,50))
+char2_left = pygame.transform.scale(pygame.image.load("./images/char2_left.png"), (50,50))
+char2_right = pygame.transform.scale(pygame.image.load("./images/char2_right.png"), (50,50))
+char2_up = pygame.transform.scale(pygame.image.load("./images/char2_up.png"), (50,50))
+char2_down = pygame.transform.scale(pygame.image.load("./images/char2_down.png"), (50,50))
+
 
 
 # game settings
@@ -64,25 +74,23 @@ safe_zones = [
     pygame.Rect(650 - right_offset, 450 - bottom_offset, 150, 150),  # bottom right
 ]
 
-# obstacles
+goal_zone = pygame.Rect(700 - right_offset, 500 - bottom_offset, 35, 80)  # bottom right corner goal state
+
+# obstacles meaning trees
 obstacles = [
-    pygame.Rect(100, 300, 50, 50),
-    # pygame.Rect(100, 400, 50, 50),
-    pygame.Rect(200, 200, 50, 50),
-    # pygame.Rect(200, 300, 50, 50),
+    pygame.Rect(100, 230, 50, 50),
+    pygame.Rect(200, 230, 50, 50),
     pygame.Rect(200, 400, 50, 50),
-    pygame.Rect(300, 100, 50, 50),
+    pygame.Rect(370, 100, 50, 50),
     pygame.Rect(300, 200, 50, 50),
     pygame.Rect(300, 300, 50, 50),
-    # pygame.Rect(300, 400, 50, 50),
     pygame.Rect(400, 100, 50, 50),
     pygame.Rect(400, 200, 50, 50),
-    pygame.Rect(400, 300, 50, 50),
-    pygame.Rect(400, 400, 50, 50),
-    pygame.Rect(500, 100, 50, 50),
-    # pygame.Rect(500, 200, 50, 50),
+    pygame.Rect(406, 400, 50, 50),
+    pygame.Rect(456, 400, 50, 50),
+    pygame.Rect(500, 300, 50, 50),
     pygame.Rect(500, 300, 50, 50),
     pygame.Rect(500, 400, 50, 50),
     pygame.Rect(600, 200, 50, 50),
-    # pygame.Rect(600, 300, 50, 50),
+
 ]

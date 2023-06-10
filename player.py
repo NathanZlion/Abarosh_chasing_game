@@ -8,21 +8,30 @@ class Player:
         self.position = self.initial_position
         self.color = color
         self.speed = speed
-        self.direction = UP
         self.game = game
 
-    def move(self):
+        self.direction = DOWN
+        self.pic = char1_down
+
+    def move(self, direction):
+        self.direction = direction
+
+        if self.direction == LEFT:
+            self.pic = char1_left
+        elif self.direction == RIGHT:
+            self.pic = char1_right
+        elif self.direction == UP:
+            self.pic = char1_up
+        elif self.direction == DOWN:
+            self.pic = char1_down
+
         # CHECK IF THE PLAYER IS MOVING OUT OF THE SCREEN
-        newPosition = (
-            self.position[0] + self.speed * self.direction[0],
-            self.position[1] + self.speed * self.direction[1],
-        )
+        newPosition = (self.position[0] + self.speed * self.direction[0],self.position[1] + self.speed * self.direction[1],)
         if self.isInbound(newPosition) and self.canMove(newPosition):
             self.position = newPosition
     
 
     def isInbound(self, position):
-        offset = 20
         return left_offset <= position[0] <= self.game.WIDTH - right_offset and top_offset <= position[1] <= self.game.HEIGHT - bottom_offset
     
     def canMove(self, nextPosition):
@@ -36,29 +45,34 @@ class Player:
         return self.isInbound(nextPosition)
 
 
-    def rotate(self, rotation_direction: str):
-        if rotation_direction == "left":
-            self.direction = LEFT_ROTATION[self.direction]
-
-        elif rotation_direction == "right":
-            self.direction = RIGHT_ROTATION[self.direction]
-
     def draw(self, screen):
-        pygame.draw.circle(screen, self.color, self.position, 10)
-        # # draw an eye for it based in the direction it's facing
+        # Draw the arrow body
+        arrow_body_start = (self.position[0] + self.direction[0] * 10, self.position[1] + self.direction[1] * 10)
+        arrow_body_end = (self.position[0] + self.direction[0] * 50, self.position[1] + self.direction[1] * 50)
+        pygame.draw.line(screen, self.color, arrow_body_start, arrow_body_end, 2)
+
+        arrowhead_point1 = (0,0)
+        arrowhead_point2 = (0,0)
+
+        # Define the arrowhead points based on the direction
         if self.direction == UP:
-            pygame.draw.circle(screen, GREEN, (self.position[0] - 5, self.position[1] - 5), 2)
-            pygame.draw.circle(screen, GREEN, (self.position[0] + 5, self.position[1] - 5), 2)
+            arrowhead_point1 = (arrow_body_end[0] - 5, arrow_body_end[1] + 10)
+            arrowhead_point2 = (arrow_body_end[0] + 5, arrow_body_end[1] + 10)
         elif self.direction == DOWN:
-            pygame.draw.circle(screen, GREEN, (self.position[0] - 5, self.position[1] + 5), 2)
-            pygame.draw.circle(screen, GREEN, (self.position[0] + 5, self.position[1] + 5), 2)
+            arrowhead_point1 = (arrow_body_end[0] - 5, arrow_body_end[1] - 10)
+            arrowhead_point2 = (arrow_body_end[0] + 5, arrow_body_end[1] - 10)
         elif self.direction == LEFT:
-            pygame.draw.circle(screen, GREEN, (self.position[0] - 5, self.position[1] - 5), 2)
-            pygame.draw.circle(screen, GREEN, (self.position[0] - 5, self.position[1] + 5), 2)
+            arrowhead_point1 = (arrow_body_end[0] + 10, arrow_body_end[1] - 5)
+            arrowhead_point2 = (arrow_body_end[0] + 10, arrow_body_end[1] + 5)
         elif self.direction == RIGHT:
-            pygame.draw.circle(screen, GREEN, (self.position[0] + 5, self.position[1] - 5), 2)
-            pygame.draw.circle(screen, GREEN, (self.position[0] + 5, self.position[1] + 5), 2)
-    
+            arrowhead_point1 = (arrow_body_end[0] - 10, arrow_body_end[1] - 5)
+            arrowhead_point2 = (arrow_body_end[0] - 10, arrow_body_end[1] + 5)
+
+        # Draw the arrowhead triangle
+        pygame.draw.polygon(screen, self.color, [arrow_body_end, arrowhead_point1, arrowhead_point2])
+
+        screen.blit(self.pic, (self.position[0] - 10, self.position[1] - 10))
+        
     def get_rect(self):
         return pygame.Rect(self.position[0] - 10, self.position[1] - 10, 20, 20)
 

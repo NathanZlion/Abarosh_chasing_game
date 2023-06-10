@@ -30,41 +30,55 @@ class Game:
         mixer.music.play(-1)
 
     def handle_events(self):
+
         for event in pygame.event.get():
-            if event.type == QUIT:
+            if event.type == pygame.QUIT:
                 self.is_running = False
 
-            if event.type == KEYDOWN:
-                if event.key == pygame.K_a:
-                    self.CHASED.rotate("left")
-
-                if event.key == pygame.K_d:
-                    self.CHASED.rotate("right")
-
-                if event.key == pygame.K_LEFT:
-                    self.CHASER.rotate("left")
-
-                if event.key == pygame.K_RIGHT:
-                    self.CHASER.rotate("right")
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.is_running = False
 
         keys_pressed = pygame.key.get_pressed()  # for continuously pressed keys
+
         if keys_pressed[K_w]:
-            self.CHASED.move()
+            self.CHASED.move(UP)
+        
+        if keys_pressed[K_s]:
+            self.CHASED.move(DOWN)
+
+        if keys_pressed[K_a]:
+            self.CHASED.move(LEFT)
+
+        if keys_pressed[K_d]:
+            self.CHASED.move(RIGHT)
+
         if keys_pressed[K_UP]:
-            self.CHASER.move()
+            self.CHASER.move(UP) 
+
+        if keys_pressed[K_DOWN]:
+            self.CHASER.move(DOWN)
+
+        if keys_pressed[K_LEFT]:
+            self.CHASER.move(LEFT)
+
+        if keys_pressed[K_RIGHT]:
+            self.CHASER.move(RIGHT)
 
     def check_collisions(self):
         chaser_rect = self.CHASER.get_rect()
         chased_rect = self.CHASED.get_rect()
+        
 
+        # chaser wins
         if chaser_rect.colliderect(chased_rect):
             self.chaser_score += 1
             self.CHASER.reset_position()
             self.CHASED.reset_position()
             self.load_winner(chaser_won=True)
 
-        goal_safe_zone = safe_zones[-1]
-        if chased_rect.colliderect(goal_safe_zone):
+        
+        if chased_rect.colliderect(goal_zone):
             self.chased_score += 1
             self.CHASED.reset_position()
             self.load_winner(chaser_won=False)
@@ -78,23 +92,17 @@ class Game:
                 i = f"0{i}"
 
             frame = pygame.transform.scale(
-                pygame.image.load(
-                    f"./images/splash_images/splash{i}.png"
-                ).convert_alpha(),
-                (800, 600),
-            )
+                pygame.image.load(f"./images/splash_images/splash{i}.png").convert_alpha(),(800, 600))
             self.splash_animation_frames.append(frame)
 
     def show_splash_screen(self):
         frame_index = 0
-        animation_delay = 100  # Delay between animation frames (in milliseconds)
+        animation_delay = 125  # Delay between animation frames (in milliseconds)
         animation_timer = 0
 
         while self.splash_screen:
             for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    quit()
+                pass # take no controls from the user while the splash screen is running
 
             self.screen.fill((0, 0, 0))  # Clear screen
 
@@ -115,7 +123,7 @@ class Game:
 
             self.clock.tick(60)  # Limit frame rate
 
-        pygame.time.wait(2000)  # Wait for 2 seconds after animation
+        pygame.time.wait(1800)  # Wait for 2 seconds after animation
         self.splash_screen = False
 
     def run(self):
@@ -154,54 +162,115 @@ class Game:
 
     def draw(self):
         self.screen.fill((0, 0, 0)) # a fallback color
-        # self.screen.blit(pygame.transform.scale(pygame.image.load("./images/background_field.jpg"), (800, 600)), (0, 0))
-        self.screen.blit(pygame.transform.scale(field, (800, 600)),(0, 0))
+
+        self.screen.blit(pygame.transform.scale(field, (800, 600)),(0, 0)) # background field image
         self.__draw_top_fence()
-        for safe_zone in safe_zones:
-            pygame.draw.rect(self.screen, GREEN, safe_zone)
-            self.screen.blit(pygame.transform.scale( house, (100, 100)),(safe_zone.x, safe_zone.y))
-
+        self.__draw_safe_zones()
         self.__draw_side_fence()
-        self.CHASER.draw(self.screen)
-        self.CHASED.draw(self.screen)
 
+
+        self.__draw_tree_shadows()
+        self.__draw_player_shadow(self.CHASER)
+        self.CHASER.draw(self.screen)
+        self.__draw_player_shadow(self.CHASED)
+        self.CHASED.draw(self.screen)
         # show trees / obstacles
         self.__draw_obstacles()
         self.__draw_bottom_fence()
-        self.__dispay_score()
+        self.__dispay_panel()
 
         pygame.display.flip()
+
+    def __draw_safe_zones(self):
+        for index in range(len(safe_zones)-1):
+            safe_zone = safe_zones[index]
+            # shrink the safe zone by 5 pixels on each side
+            safe_zone = safe_zone.inflate(-25, -25)
+            pygame.draw.rect(self.screen, BROWN, safe_zone)    # brown background
+            pygame.draw.rect(self.screen, BLUE, safe_zone, 5)  # blue border
+            self.screen.blit(pygame.transform.scale( house, (100, 100))
+                             ,(safe_zone.x, safe_zone.y)) # house
+        
+        # for the bottom right corner show the goal
+        self.screen.blit(pygame.transform.scale( goal, (50, 50)),(700, 500))
+        # show text in blue saying "GOAL" on top of the goal
+        font = pygame.font.SysFont("comic", 24)
+        text = "GOAL"
+        text_rect = font.render(text, True, BLUE)
+        text_rect_rectangle = pygame.Rect(0, 0, 0, 0)
+        text_rect_rectangle.center = (725, 525)
+        self.screen.blit(text_rect, text_rect_rectangle)
+
 
     def __draw_top_fence(self):
         # around the top and bottom
         for i in range(0, 800 - right_offset, fence_gap):
             self.screen.blit(pygame.transform.scale(fence_wood, (50, 50)),(i, 0))
+            # rectangular shadow
+            shadow = pygame.Surface((15, 5))
+            # rotate the shadow 45 degrees
+            shadow = pygame.transform.rotate(shadow, 45)
+            shadow.set_alpha(100)
+            shadow.fill((0, 0, 0))
+            self.screen.blit(shadow, (i, 0))
 
     def __draw_side_fence(self):
         # aroung the sides
         for i in range(0, 600, fence_gap):
             self.screen.blit(pygame.transform.scale(fence_wood, (50, 50)),(0, i))
             self.screen.blit(pygame.transform.scale(fence_wood, (50, 50)),(750, i))
+            # rectangular shadow
+            shadow = pygame.Surface((15, 5))
+            shadow = pygame.transform.rotate(shadow, 45)
+            shadow.set_alpha(100)
+            shadow.fill((0, 0, 0))
+            self.screen.blit(shadow, (0, i))
+            self.screen.blit(shadow, (750, i))
+
     
     def __draw_bottom_fence(self):
         for i in range(0, 800 - right_offset, fence_gap):
             self.screen.blit(pygame.transform.scale(fence_wood, (50, 50)),(i, 550))
+            # rectangular shadow
+            shadow = pygame.Surface((15, 5))
+            shadow = pygame.transform.rotate(shadow, 45)
+            shadow.set_alpha(100)
+            shadow.fill((0, 0, 0))
+            self.screen.blit(shadow, (i, 550))
 
 
-    def __dispay_score(self):
+    def __dispay_panel(self):
         # Display scores
-        font = pygame.font.SysFont("Comic Sans", 36)
+        font = pygame.font.SysFont("Comic Sans", 30)
         chaser_score_text = font.render(f"Chaser Score: {self.chaser_score}", True, WHITE)
         chased_score_text = font.render(f"Chased Score: {self.chased_score}", True, WHITE)
-        self.screen.blit(chaser_score_text, (10, 10))
-        self.screen.blit(chased_score_text, (10, 50))
+        self.screen.blit(chaser_score_text, (5, 5))
+        self.screen.blit(chased_score_text, (5, 50))
+
+        # display controls
+        font = pygame.font.SysFont("Comic Sans", 15)
+        controls_text = font.render("Chaser Controls: WASD, Chased Controls: Arrow Keys, ESC to quit", True, WHITE)
+        controls_text_area = controls_text.get_rect()
+        controls_text_area.center = ( self.screen.get_rect().width //2 + 70 , 25)
+        self.screen.blit(controls_text, controls_text_area)
 
 
     def __draw_obstacles(self):
         for circular_obstacle in obstacles:
-            pygame.draw.circle(self.screen, shade, circular_obstacle.center, 25)
             self.screen.blit(pygame.transform.scale(tree, (60, 80)), (circular_obstacle.centerx - 35, circular_obstacle.centery - 60))
 
+    def __draw_tree_shadows(self):
+        for circular_obstacle in obstacles:
+            shadow_radius = 25
+            shadow = pygame.Surface((shadow_radius * 2, shadow_radius * 2), pygame.SRCALPHA)
+            pygame.draw.circle(shadow, (0, 0, 0, 100), (shadow_radius, shadow_radius), shadow_radius)
+            self.screen.blit(shadow, (circular_obstacle.centerx - shadow_radius, circular_obstacle.centery - shadow_radius))
+
+    def __draw_player_shadow(self, player: Player):
+        shadow_radius = 12
+        shadow = pygame.Surface((shadow_radius * 2, shadow_radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(shadow, (0, 0, 0, 100), (shadow_radius, shadow_radius), shadow_radius)
+        self.screen.blit(shadow, (player.position[0] - shadow_radius, player.position[1] - shadow_radius))
 
 if __name__ == "__main__":
     game : Game = Game()
