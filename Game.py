@@ -1,9 +1,8 @@
 import pygame
-from pygame.locals import *
 from Chaser import Chaser
 from player import Player
 from utils import *
-from pygame import mixer
+from pygame import K_DOWN, K_LEFT, K_RIGHT, K_UP, K_a, K_d, K_s, K_w, mixer
 
 
 class Game:
@@ -19,18 +18,16 @@ class Game:
         self.chaser_score = 0
         self.chased_score = 0
         self.splash_animation_frames = []
-        self.load_splash_animation_frames()  # Load animation frames
+        self.__load_splash_animation_frames()  # Load animation frames
 
         # creating the players
         self.CHASER = Chaser(game=self, color=RED, speed=CHASER_SPEED)
         self.CHASED = Player(game=self, position=CHASED_INITIAL_POSITION, color=BLUE, speed=CHASED_SPEED)
 
         # play game_music
-        mixer.music.load("./sounds/conga_loop.mp3")
-        mixer.music.play(-1)
+        game_music.play()
 
     def handle_events(self):
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.is_running = False
@@ -43,7 +40,7 @@ class Game:
 
         if keys_pressed[K_w]:
             self.CHASED.move(UP)
-        
+
         if keys_pressed[K_s]:
             self.CHASED.move(DOWN)
 
@@ -83,7 +80,7 @@ class Game:
             self.CHASED.reset_position()
             self.load_winner(chaser_won=False)
 
-    def load_splash_animation_frames(self):
+    def __load_splash_animation_frames(self):
         # play music
         loading_sound.play()
 
@@ -152,13 +149,15 @@ class Game:
 
         # Display winner text
         self.screen.blit(text_rect, text_rect_rectangle)
-
         pygame.display.flip()
-        pygame.mixer.music.load("./sounds/truimpth.mp3")
-        pygame.mixer.music.play(start=0.0)
+
+        game_music.stop()
+        winning_sound.play()
         pygame.time.wait(4000)
-        mixer.music.load("./sounds/conga_loop.mp3")
-        mixer.music.play(-1)
+
+        winning_sound.stop()
+        game_music.play()
+
 
     def draw(self):
         self.screen.fill((0, 0, 0)) # a fallback color
@@ -174,6 +173,7 @@ class Game:
         self.CHASER.draw(self.screen)
         self.__draw_player_shadow(self.CHASED)
         self.CHASED.draw(self.screen)
+        
         # show trees / obstacles
         self.__draw_obstacles()
         self.__draw_bottom_fence()
