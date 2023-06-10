@@ -41,5 +41,5 @@ class Chaser(Player):
 
         return True
 
-    def isInbound(self, position):
-        return (0 <= position[0] <= self.game.WIDTH and 0 <= position[1] <= self.game.HEIGHT)
+    # def isInbound(self, position):
+    #     return (0 <= position[0] <= self.game.WIDTH and 0 <= position[1] <= self.game.HEIGHT)

@@ -1,4 +1,7 @@
 __pycache__/    # Python bytecode (compiled Python code)
+# all inside __pycache__ folder
+*.pyc
+
 # for vscode files
 .vscode/
 # for pycharm files
