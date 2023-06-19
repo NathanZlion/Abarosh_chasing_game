@@ -18,6 +18,10 @@ class Game:
         self.chased_score = 0
         self.splash_animation_frames = []
         self.__load_splash_animation_frames()  # Load animation frames
+        # Menu variables
+        self.main_menu = True
+        self.pause_menu = False
+        self.selected_menu_index = 0
 
         # creating the players
         self.CHASER = Chaser(game=self, color=RED, speed=CHASER_SPEED)
@@ -31,35 +35,46 @@ class Game:
             if event.type == pygame.QUIT:
                 self.is_running = False
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    self.is_running = False
+            # just starting and in main menu state
+            if self.main_menu:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        self.selected_menu_index = (self.selected_menu_index + 1) % MAIN_MENU_COUNT
+                    elif event.key == pygame.K_DOWN:
+                        self.selected_menu_index = (self.selected_menu_index + 1) % MAIN_MENU_COUNT
+                    elif event.key == pygame.K_RETURN:
+                        self.__handle_menu_selection()
+            
+            # in paused state
+            elif self.pause_menu:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        self.selected_menu_index = (self.selected_menu_index - 1) % PAUSE_MENU_COUNT
+                    elif event.key == pygame.K_DOWN:
+                        self.selected_menu_index = (self.selected_menu_index + 1) % PAUSE_MENU_COUNT
+                    elif event.key == pygame.K_RETURN:
+                        self.__handle_menu_selection()
+                    elif event.key == pygame.K_SPACE:
+                        self.pause_menu = False
 
-        keys_pressed = pygame.key.get_pressed()  # for continuously pressed keys
+            else:
+                if event.type == pygame.KEYDOWN:
+                    # enter paused state
+                    if event.key == pygame.K_ESCAPE or event.key == pygame.K_SPACE:
+                        self.pause_menu = True
+                        self.main_menu = False
 
-        if keys_pressed[pygame.K_w]:
-            self.CHASED.move(UP)
+        if not self.main_menu and not self.pause_menu:
+            keys_pressed = pygame.key.get_pressed()  # for continuously pressed keys
+            if keys_pressed[pygame.K_w]: self.CHASED.move(UP)
+            if keys_pressed[pygame.K_s]: self.CHASED.move(DOWN)
+            if keys_pressed[pygame.K_a]: self.CHASED.move(LEFT)
+            if keys_pressed[pygame.K_d]: self.CHASED.move(RIGHT)
+            if keys_pressed[pygame.K_UP]: self.CHASER.move(UP) 
+            if keys_pressed[pygame.K_DOWN]: self.CHASER.move(DOWN)
+            if keys_pressed[pygame.K_LEFT]: self.CHASER.move(LEFT)
+            if keys_pressed[pygame.K_RIGHT]: self.CHASER.move(RIGHT)
 
-        if keys_pressed[pygame.K_s]:
-            self.CHASED.move(DOWN)
-
-        if keys_pressed[pygame.K_a]:
-            self.CHASED.move(LEFT)
-
-        if keys_pressed[pygame.K_d]:
-            self.CHASED.move(RIGHT)
-
-        if keys_pressed[pygame.K_UP]:
-            self.CHASER.move(UP) 
-
-        if keys_pressed[pygame.K_DOWN]:
-            self.CHASER.move(DOWN)
-
-        if keys_pressed[pygame.K_LEFT]:
-            self.CHASER.move(LEFT)
-
-        if keys_pressed[pygame.K_RIGHT]:
-            self.CHASER.move(RIGHT)
 
     def check_collisions(self):
         chaser_rect = self.CHASER.get_rect()
@@ -128,15 +143,23 @@ class Game:
         while self.is_running:
             self.handle_events()
 
-            if not self.splash_screen:
+            if self.main_menu:
+                self.screen.fill((0, 0, 0))  # Clear the screen
+                self.__show_main_menu()
+                pygame.display.flip()
+
+            elif self.pause_menu:
+                self.screen.fill((0, 0, 0))  # Clear the screen
+                self.__show_pause_menu()
+                pygame.display.flip()
+
+            else:
                 self.check_collisions()
                 self.draw()
+                pygame.display.flip()
 
             # Limit frame rate
             self.clock.tick(10)
-
-        pygame.mixer.music.stop()
-        pygame.quit()
 
     def load_winner(self, chaser_won=True):
         # Display winner text
@@ -237,7 +260,6 @@ class Game:
             shadow.fill((0, 0, 0))
             self.screen.blit(shadow, (i, 550))
 
-
     def __dispay_panel(self):
         # Display scores
         font = pygame.font.SysFont("Comic Sans", 30)
@@ -247,10 +269,10 @@ class Game:
         self.screen.blit(chased_score_text, (5, 50))
 
         # display controls
-        font = pygame.font.SysFont("Comic Sans", 15)
+        font = pygame.font.SysFont("Comic Sans", 16)
         controls_text = font.render("Chaser Controls: WASD, Chased Controls: Arrow Keys, ESC to quit", True, WHITE)
         controls_text_area = controls_text.get_rect()
-        controls_text_area.center = ( self.screen.get_rect().width //2 + 70 , 25)
+        controls_text_area.center = ( self.screen.get_rect().width //2 + 65 , 25)
         self.screen.blit(controls_text, controls_text_area)
 
 
@@ -270,3 +292,64 @@ class Game:
         shadow = pygame.Surface((shadow_radius * 2, shadow_radius * 2), pygame.SRCALPHA)
         pygame.draw.circle(shadow, (0, 0, 0, 100), (shadow_radius, shadow_radius), shadow_radius)
         self.screen.blit(shadow, (player.position[0] - shadow_radius, player.position[1] - shadow_radius))
+
+    def __show_main_menu(self):
+        # Display main menu options
+        font = pygame.font.SysFont("Comic Sans", 40)
+        new_game_text = font.render("New Game", True, WHITE if self.selected_menu_index == 0 else GRAY)
+        quit_text = font.render("Quit", True, WHITE if self.selected_menu_index == 1 else GRAY)
+
+        # Calculate option positions
+        new_game_pos = (self.WIDTH // 2 - new_game_text.get_width() // 2, self.HEIGHT // 2 - new_game_text.get_height())
+        quit_pos = (self.WIDTH // 2 - quit_text.get_width() // 2, self.HEIGHT // 2)
+
+        # Display options on the screen
+        self.screen.blit(new_game_text, new_game_pos)
+        self.screen.blit(quit_text, quit_pos)
+
+    def __show_pause_menu(self):
+        # Display pause menu options
+        font = pygame.font.SysFont("Comic Sans", 40)
+        play_text = font.render("Play", True, WHITE if self.selected_menu_index == 0 else GRAY)
+        new_game_text = font.render("New Game", True, WHITE if self.selected_menu_index == 1 else GRAY)
+        quit_text = font.render("Quit", True, WHITE if self.selected_menu_index == 2 else GRAY)
+
+        # Calculate option positions
+        play_pos = (self.WIDTH // 2 - play_text.get_width() // 2, self.HEIGHT // 2 - play_text.get_height())
+        new_game_pos = (self.WIDTH // 2 - new_game_text.get_width() // 2, self.HEIGHT // 2)
+        quit_pos = (self.WIDTH // 2 - quit_text.get_width() // 2, self.HEIGHT // 2 + quit_text.get_height())
+
+        # Display options on the screen
+        self.screen.blit(play_text, play_pos)
+        self.screen.blit(new_game_text, new_game_pos)
+        self.screen.blit(quit_text, quit_pos)
+
+    def __handle_menu_selection(self):
+        # in side main menu
+        if self.main_menu:
+            if self.selected_menu_index == 0:
+                self.new_game() # start new game
+
+            elif self.selected_menu_index == 1:
+                pygame.quit()
+        
+        # in side pause menu
+        elif self.pause_menu:
+            if self.selected_menu_index == 0:
+                self.pause_menu = False
+
+            elif self.selected_menu_index == 1:
+                self.new_game()
+
+            elif self.selected_menu_index == 2:
+                pygame.quit()
+
+    def new_game(self):
+        self.chaser_score = 0
+        self.chased_score = 0
+        self.CHASER = Chaser(game=self, color=RED, speed=CHASER_SPEED)
+        self.CHASED = Player(game=self, position=CHASED_INITIAL_POSITION, color=BLUE, speed=CHASED_SPEED)
+        self.main_menu = False
+        self.pause_menu = False
+        self.game_over = False
+        self.selected_menu_index = 0

@@ -10,7 +10,7 @@ LEFT = (-1, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
-GREY = (128, 128, 128)
+GRAY = (128, 128, 128)
 BROWN = (165, 42, 42)
 WHITE = (255, 255, 255)
 shade = (0, 0, 0, 1)
@@ -92,5 +92,8 @@ obstacles = [
     pygame.Rect(500, 300, 50, 50),
     pygame.Rect(500, 400, 50, 50),
     pygame.Rect(600, 200, 50, 50),
-
 ]
+
+# menus count
+MAIN_MENU_COUNT = 2
+PAUSE_MENU_COUNT = 3
