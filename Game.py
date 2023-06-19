@@ -2,7 +2,6 @@ import pygame
 from Chaser import Chaser
 from player import Player
 from utils import *
-from pygame import K_DOWN, K_LEFT, K_RIGHT, K_UP, K_a, K_d, K_s, K_w, mixer
 
 
 class Game:
@@ -38,28 +37,28 @@ class Game:
 
         keys_pressed = pygame.key.get_pressed()  # for continuously pressed keys
 
-        if keys_pressed[K_w]:
+        if keys_pressed[pygame.K_w]:
             self.CHASED.move(UP)
 
-        if keys_pressed[K_s]:
+        if keys_pressed[pygame.K_s]:
             self.CHASED.move(DOWN)
 
-        if keys_pressed[K_a]:
+        if keys_pressed[pygame.K_a]:
             self.CHASED.move(LEFT)
 
-        if keys_pressed[K_d]:
+        if keys_pressed[pygame.K_d]:
             self.CHASED.move(RIGHT)
 
-        if keys_pressed[K_UP]:
+        if keys_pressed[pygame.K_UP]:
             self.CHASER.move(UP) 
 
-        if keys_pressed[K_DOWN]:
+        if keys_pressed[pygame.K_DOWN]:
             self.CHASER.move(DOWN)
 
-        if keys_pressed[K_LEFT]:
+        if keys_pressed[pygame.K_LEFT]:
             self.CHASER.move(LEFT)
 
-        if keys_pressed[K_RIGHT]:
+        if keys_pressed[pygame.K_RIGHT]:
             self.CHASER.move(RIGHT)
 
     def check_collisions(self):
