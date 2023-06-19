@@ -44,7 +44,7 @@ class Game:
                         self.selected_menu_index = (self.selected_menu_index + 1) % MAIN_MENU_COUNT
                     elif event.key == pygame.K_RETURN:
                         self.__handle_menu_selection()
-            
+
             # in paused state
             elif self.pause_menu:
                 if event.type == pygame.KEYDOWN:
@@ -54,7 +54,7 @@ class Game:
                         self.selected_menu_index = (self.selected_menu_index + 1) % PAUSE_MENU_COUNT
                     elif event.key == pygame.K_RETURN:
                         self.__handle_menu_selection()
-                    elif event.key == pygame.K_SPACE:
+                    elif event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE:
                         self.pause_menu = False
 
             else:
@@ -144,12 +144,24 @@ class Game:
             self.handle_events()
 
             if self.main_menu:
-                self.screen.fill((0, 0, 0))  # Clear the screen
+                # Blurry image transition to make the selection menu lively
+                blurred_bg = pygame.Surface(self.screen.get_size())
+                blurred_bg.blit(self.screen, (0, 0))
+                blurred_bg = blurred_bg.convert_alpha()
+                blurred_bg.fill((0, 0, 0, 128), special_flags=pygame.BLEND_RGBA_MULT)
+                self.screen.blit(blurred_bg, (0, 0))
+
                 self.__show_main_menu()
                 pygame.display.flip()
 
             elif self.pause_menu:
-                self.screen.fill((0, 0, 0))  # Clear the screen
+                # a blurry animation to make the selection menu looking good and lively
+                blurred_bg = pygame.Surface(self.screen.get_size())
+                blurred_bg.blit(self.screen, (0, 0))
+                blurred_bg = blurred_bg.convert_alpha()
+                blurred_bg.fill((0, 0, 0, 128), special_flags=pygame.BLEND_RGBA_MULT)
+                self.screen.blit(blurred_bg, (0, 0))
+
                 self.__show_pause_menu()
                 pygame.display.flip()
 
@@ -161,21 +173,47 @@ class Game:
             # Limit frame rate
             self.clock.tick(10)
 
+
     def load_winner(self, chaser_won=True):
         # Display winner text
         font = pygame.font.SysFont("comic", 72)
         text = "Chaser Wins!" if chaser_won else "Chased Wins!"
-        text_rect = font.render(text, True, BLUE)
-        text_rect_rectangle = pygame.Rect(0, 0, 0, 0)
-        text_rect_rectangle.center = self.screen.get_rect().center
+        text_surf = font.render(text, True, pygame.Color("white"))
+        text_rect = text_surf.get_rect(center=self.screen.get_rect().center)
 
-        # Display winner text
-        self.screen.blit(text_rect, text_rect_rectangle)
+        # Create a blurred background surface
+        blurred_bg = pygame.Surface(self.screen.get_size())
+        blurred_bg.blit(self.screen, (0, 0))
+        blurred_bg = blurred_bg.convert_alpha()
+        blurred_bg.fill((0, 0, 0, 128), special_flags=pygame.BLEND_RGBA_MULT)
+        self.screen.blit(blurred_bg, (0, 0))
+
+        # Display winner text at the center of the screen
+        self.screen.blit(text_surf, text_rect)
+        pygame.display.flip()
+
+        # Calculate the dimensions of the loading screen line
+        line_length = self.screen.get_width() - 40
+        line_height = 10
+        line_color = pygame.Color("green")
+        line_start_pos = (20, self.screen.get_height() // 20 * 19)
+
+        # Draw the initial loading screen line
+        pygame.draw.rect(self.screen, line_color, (line_start_pos, (0, line_height)))
         pygame.display.flip()
 
         game_music.stop()
         winning_sound.play()
-        pygame.time.wait(4000)
+
+        # Start the timer for 4 seconds
+        timer = pygame.time.get_ticks()
+        while pygame.time.get_ticks() - timer < 4000:
+            progress = (pygame.time.get_ticks() - timer) / 4000
+            progress_length = int(line_length * progress)
+
+            # Update the loading screen line progress
+            pygame.draw.rect(self.screen, line_color, (line_start_pos, (progress_length, line_height)))
+            pygame.display.flip()
 
         winning_sound.stop()
         game_music.play()
@@ -220,7 +258,7 @@ class Game:
         text = "GOAL"
         text_rect = font.render(text, True, BLUE)
         text_rect_rectangle = pygame.Rect(0, 0, 0, 0)
-        text_rect_rectangle.center = (725, 525)
+        text_rect_rectangle.center = (705, 525)
         self.screen.blit(text_rect, text_rect_rectangle)
 
 
@@ -265,14 +303,14 @@ class Game:
         font = pygame.font.SysFont("Comic Sans", 30)
         chaser_score_text = font.render(f"Chaser Score: {self.chaser_score}", True, WHITE)
         chased_score_text = font.render(f"Chased Score: {self.chased_score}", True, WHITE)
-        self.screen.blit(chaser_score_text, (5, 5))
-        self.screen.blit(chased_score_text, (5, 50))
+        self.screen.blit(chaser_score_text, (10, 5))
+        self.screen.blit(chased_score_text, (10, 50))
 
         # display controls
-        font = pygame.font.SysFont("Comic Sans", 16)
+        font = pygame.font.SysFont("Comic Sans", 15)
         controls_text = font.render("Chaser Controls: WASD, Chased Controls: Arrow Keys, ESC to quit", True, WHITE)
         controls_text_area = controls_text.get_rect()
-        controls_text_area.center = ( self.screen.get_rect().width //2 + 65 , 25)
+        controls_text_area.center = ( self.screen.get_rect().width //2 + 85, 15)
         self.screen.blit(controls_text, controls_text_area)
 
 
@@ -296,8 +334,8 @@ class Game:
     def __show_main_menu(self):
         # Display main menu options
         font = pygame.font.SysFont("Comic Sans", 40)
-        new_game_text = font.render("New Game", True, WHITE if self.selected_menu_index == 0 else GRAY)
-        quit_text = font.render("Quit", True, WHITE if self.selected_menu_index == 1 else GRAY)
+        new_game_text = font.render("> New Game" if self.selected_menu_index == 0 else "New Game" , True, WHITE if self.selected_menu_index == 0 else GRAY)
+        quit_text = font.render("> Quit" if self.selected_menu_index == 1 else "Quit", True, WHITE if self.selected_menu_index == 1 else GRAY)
 
         # Calculate option positions
         new_game_pos = (self.WIDTH // 2 - new_game_text.get_width() // 2, self.HEIGHT // 2 - new_game_text.get_height())
@@ -310,9 +348,9 @@ class Game:
     def __show_pause_menu(self):
         # Display pause menu options
         font = pygame.font.SysFont("Comic Sans", 40)
-        play_text = font.render("Play", True, WHITE if self.selected_menu_index == 0 else GRAY)
-        new_game_text = font.render("New Game", True, WHITE if self.selected_menu_index == 1 else GRAY)
-        quit_text = font.render("Quit", True, WHITE if self.selected_menu_index == 2 else GRAY)
+        play_text = font.render("> Play"  if self.selected_menu_index == 0 else "Play", True, WHITE if self.selected_menu_index == 0 else GRAY)
+        new_game_text = font.render("> New Game" if self.selected_menu_index == 1 else "New Game", True, WHITE if self.selected_menu_index == 1 else GRAY)
+        quit_text = font.render("> Quit" if self.selected_menu_index == 2  else "Quit", True, WHITE if self.selected_menu_index == 2 else GRAY)
 
         # Calculate option positions
         play_pos = (self.WIDTH // 2 - play_text.get_width() // 2, self.HEIGHT // 2 - play_text.get_height())
