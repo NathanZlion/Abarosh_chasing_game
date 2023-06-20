@@ -26,7 +26,7 @@ class Player:
             self.pic = char1_down
 
         # CHECK IF THE PLAYER IS MOVING OUT OF THE SCREEN
-        newPosition = (self.position[0] + self.speed * self.direction[0],self.position[1] + self.speed * self.direction[1],)
+        newPosition = (self.position[0] + self.speed * self.direction[0], self.position[1] + self.speed * self.direction[1],)
         if self.isInbound(newPosition) and self.canMove(newPosition):
             self.position = newPosition
     
@@ -38,7 +38,6 @@ class Player:
         # checks for obstacles
         for obstacle in obstacles:
             if obstacle.collidepoint(nextPosition):
-                # bump_sound.play()   # bump sound when hitting trees
                 return False
 
         # checks for the screen boundaries
@@ -49,32 +48,6 @@ class Player:
         # drawing the player
         screen.blit(self.pic, (self.position[0] - 10, self.position[1] - 10))
 
-        # Draw the arrow body
-        arrow_body_start = (self.position[0] + self.direction[0] * 10, self.position[1] + self.direction[1] * 10)
-        arrow_body_end = (self.position[0] + self.direction[0] * 25, self.position[1] + self.direction[1] * 25)
-        pygame.draw.line(screen, self.color, arrow_body_start, arrow_body_end, 3)
-
-        arrowhead_point1 = (0,0)
-        arrowhead_point2 = (0,0)
-
-        # Define the arrowhead points based on the direction
-        if self.direction == UP:
-            arrowhead_point1 = (arrow_body_end[0] - 5, arrow_body_end[1] + 10)
-            arrowhead_point2 = (arrow_body_end[0] + 5, arrow_body_end[1] + 10)
-        elif self.direction == DOWN:
-            arrowhead_point1 = (arrow_body_end[0] - 5, arrow_body_end[1] - 10)
-            arrowhead_point2 = (arrow_body_end[0] + 5, arrow_body_end[1] - 10)
-        elif self.direction == LEFT:
-            arrowhead_point1 = (arrow_body_end[0] + 10, arrow_body_end[1] - 5)
-            arrowhead_point2 = (arrow_body_end[0] + 10, arrow_body_end[1] + 5)
-        elif self.direction == RIGHT:
-            arrowhead_point1 = (arrow_body_end[0] - 10, arrow_body_end[1] - 5)
-            arrowhead_point2 = (arrow_body_end[0] - 10, arrow_body_end[1] + 5)
-
-        # Draw the arrowhead triangle
-        pygame.draw.polygon(screen, self.color, [arrow_body_end, arrowhead_point1, arrowhead_point2])
-
-        
     def get_rect(self):
         return pygame.Rect(self.position[0] - 10, self.position[1] - 10, 20, 20)
 

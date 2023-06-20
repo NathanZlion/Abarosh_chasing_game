@@ -3,7 +3,6 @@ from Chaser import Chaser
 from player import Player
 from utils import *
 
-
 class Game:
     def __init__(self):
         pygame.init()
@@ -39,7 +38,7 @@ class Game:
             if self.main_menu:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
-                        self.selected_menu_index = (self.selected_menu_index + 1) % MAIN_MENU_COUNT
+                        self.selected_menu_index = (self.selected_menu_index - 1) % MAIN_MENU_COUNT
                     elif event.key == pygame.K_DOWN:
                         self.selected_menu_index = (self.selected_menu_index + 1) % MAIN_MENU_COUNT
                     elif event.key == pygame.K_RETURN:
@@ -76,7 +75,7 @@ class Game:
             if keys_pressed[pygame.K_RIGHT]: self.CHASER.move(RIGHT)
 
 
-    def check_collisions(self):
+    def check_game_over(self):
         chaser_rect = self.CHASER.get_rect()
         chased_rect = self.CHASED.get_rect()
         
@@ -102,8 +101,7 @@ class Game:
             if i < 10:
                 i = f"0{i}"
 
-            frame = pygame.transform.scale(
-                pygame.image.load(f"./images/splash_images/splash{i}.png").convert_alpha(),(800, 600))
+            frame = pygame.transform.scale(pygame.image.load(f"./images/splash_images/splash{i}.png").convert_alpha(),(800, 600))
             self.splash_animation_frames.append(frame)
 
     def show_splash_screen(self):
@@ -133,7 +131,6 @@ class Game:
                 break
 
             self.clock.tick(60)  # Limit frame rate
-
         pygame.time.wait(1800)  # Wait for 2 seconds after animation
         self.splash_screen = False
 
@@ -144,13 +141,6 @@ class Game:
             self.handle_events()
 
             if self.main_menu:
-                # Blurry image transition to make the selection menu lively
-                blurred_bg = pygame.Surface(self.screen.get_size())
-                blurred_bg.blit(self.screen, (0, 0))
-                blurred_bg = blurred_bg.convert_alpha()
-                blurred_bg.fill((0, 0, 0, 128), special_flags=pygame.BLEND_RGBA_MULT)
-                self.screen.blit(blurred_bg, (0, 0))
-
                 self.__show_main_menu()
                 pygame.display.flip()
 
@@ -166,8 +156,8 @@ class Game:
                 pygame.display.flip()
 
             else:
-                self.check_collisions()
-                self.draw()
+                self.check_game_over()
+                self.draw_game_board()
                 pygame.display.flip()
 
             # Limit frame rate
@@ -219,7 +209,7 @@ class Game:
         game_music.play()
 
 
-    def draw(self):
+    def draw_game_board(self):
         self.screen.fill((0, 0, 0)) # a fallback color
 
         self.screen.blit(pygame.transform.scale(field, (800, 600)),(0, 0)) # background field image
@@ -389,5 +379,3 @@ class Game:
         self.CHASED = Player(game=self, position=CHASED_INITIAL_POSITION, color=BLUE, speed=CHASED_SPEED)
         self.main_menu = False
         self.pause_menu = False
-        self.game_over = False
-        self.selected_menu_index = 0

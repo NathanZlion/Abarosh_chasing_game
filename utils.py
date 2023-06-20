@@ -23,11 +23,6 @@ CHASED_SPEED = 8
 CHASER_INITIAL_POSITION = (450, 450)
 CHASED_INITIAL_POSITION = (100, 120)
 
-# rotation
-RIGHT_ROTATION = {UP: RIGHT, RIGHT: DOWN, DOWN: LEFT, LEFT: UP}
-LEFT_ROTATION = {UP: LEFT, LEFT: DOWN, DOWN: RIGHT, RIGHT: UP}
-
-
 # sounds
 pygame.mixer.init()
 loading_sound = pygame.mixer.Sound("./sounds/loading.mp3")
@@ -48,14 +43,14 @@ house = pygame.image.load("./images/house.png")
 fence_wood = pygame.image.load("./images/one_fence.png")
 field = pygame.image.load("./images/grass_field.png")
 goal = pygame.image.load("./images/target.png")
-char1_left = pygame.transform.scale(pygame.image.load("./images/char1_left.png"), (50,50))
-char1_right = pygame.transform.scale(pygame.image.load("./images/char1_right.png"), (50,50))
-char1_up = pygame.transform.scale(pygame.image.load("./images/char1_up.png"), (50,50))
-char1_down = pygame.transform.scale(pygame.image.load("./images/char1_down.png"), (50,50))
-char2_left = pygame.transform.scale(pygame.image.load("./images/char2_left.png"), (50,50))
-char2_right = pygame.transform.scale(pygame.image.load("./images/char2_right.png"), (50,50))
-char2_up = pygame.transform.scale(pygame.image.load("./images/char2_up.png"), (50,50))
-char2_down = pygame.transform.scale(pygame.image.load("./images/char2_down.png"), (50,50))
+char1_left = pygame.transform.scale(pygame.image.load("./images/char1_left.png"), (40,40))
+char1_right = pygame.transform.scale(pygame.image.load("./images/char1_right.png"), (40,40))
+char1_up = pygame.transform.scale(pygame.image.load("./images/char1_up.png"), (40,40))
+char1_down = pygame.transform.scale(pygame.image.load("./images/char1_down.png"), (40,40))
+char2_left = pygame.transform.scale(pygame.image.load("./images/char2_left.png"), (40,40))
+char2_right = pygame.transform.scale(pygame.image.load("./images/char2_right.png"), (40,40))
+char2_up = pygame.transform.scale(pygame.image.load("./images/char2_up.png"), (40,40))
+char2_down = pygame.transform.scale(pygame.image.load("./images/char2_down.png"), (40,40))
 
 
 
