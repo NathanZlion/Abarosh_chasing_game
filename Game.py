@@ -322,6 +322,8 @@ class Game:
         self.screen.blit(shadow, (player.position[0] - shadow_radius, player.position[1] - shadow_radius))
 
     def __show_main_menu(self):
+        # clearing screen
+        self.screen.fill(BLACK)
         # Display main menu options
         font = pygame.font.SysFont("Comic Sans", 40)
         new_game_text = font.render("> New Game" if self.selected_menu_index == 0 else "New Game" , True, WHITE if self.selected_menu_index == 0 else GRAY)
