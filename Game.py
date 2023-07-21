@@ -78,7 +78,6 @@ class Game:
     def check_game_over(self):
         chaser_rect = self.CHASER.get_rect()
         chased_rect = self.CHASED.get_rect()
-        
 
         # chaser wins
         if chaser_rect.colliderect(chased_rect):
@@ -86,7 +85,6 @@ class Game:
             self.CHASER.reset_position()
             self.CHASED.reset_position()
             self.load_winner(chaser_won=True)
-
         
         if chased_rect.colliderect(goal_zone):
             self.chased_score += 1
@@ -231,6 +229,16 @@ class Game:
 
         pygame.display.flip()
 
+
+    def new_game(self):
+        self.chaser_score = 0
+        self.chased_score = 0
+        self.CHASER = Chaser(game=self, color=RED, speed=CHASER_SPEED)
+        self.CHASED = Player(game=self, position=CHASED_INITIAL_POSITION, color=BLUE, speed=CHASED_SPEED)
+        self.main_menu = False
+        self.pause_menu = False
+
+
     def __draw_safe_zones(self):
         for index in range(len(safe_zones)-1):
             safe_zone = safe_zones[index]
@@ -264,6 +272,7 @@ class Game:
             shadow.fill((0, 0, 0))
             self.screen.blit(shadow, (i, 0))
 
+
     def __draw_side_fence(self):
         # aroung the sides
         for i in range(0, 600, fence_gap):
@@ -277,82 +286,6 @@ class Game:
             self.screen.blit(shadow, (0, i))
             self.screen.blit(shadow, (750, i))
 
-    
-    def __draw_bottom_fence(self):
-        for i in range(0, 800 - right_offset, fence_gap):
-            self.screen.blit(pygame.transform.scale(fence_wood, (50, 50)),(i, 550))
-            # rectangular shadow
-            shadow = pygame.Surface((15, 5))
-            shadow = pygame.transform.rotate(shadow, 45)
-            shadow.set_alpha(100)
-            shadow.fill((0, 0, 0))
-            self.screen.blit(shadow, (i, 550))
-
-    def __dispay_panel(self):
-        # Display scores
-        font = pygame.font.SysFont("Comic Sans", 30)
-        chaser_score_text = font.render(f"Chaser Score: {self.chaser_score}", True, WHITE)
-        chased_score_text = font.render(f"Chased Score: {self.chased_score}", True, WHITE)
-        self.screen.blit(chaser_score_text, (10, 5))
-        self.screen.blit(chased_score_text, (10, 50))
-
-        # display controls
-        font = pygame.font.SysFont("Comic Sans", 15)
-        controls_text = font.render("Chaser Controls: WASD, Chased Controls: Arrow Keys, ESC to quit", True, WHITE)
-        controls_text_area = controls_text.get_rect()
-        controls_text_area.center = ( self.screen.get_rect().width //2 + 85, 15)
-        self.screen.blit(controls_text, controls_text_area)
-
-
-    def __draw_obstacles(self):
-        for circular_obstacle in obstacles:
-            self.screen.blit(pygame.transform.scale(tree, (60, 80)), (circular_obstacle.centerx - 35, circular_obstacle.centery - 60))
-
-    def __draw_tree_shadows(self):
-        for circular_obstacle in obstacles:
-            shadow_radius = 25
-            shadow = pygame.Surface((shadow_radius * 2, shadow_radius * 2), pygame.SRCALPHA)
-            pygame.draw.circle(shadow, (0, 0, 0, 100), (shadow_radius, shadow_radius), shadow_radius)
-            self.screen.blit(shadow, (circular_obstacle.centerx - shadow_radius, circular_obstacle.centery - shadow_radius))
-
-    def __draw_player_shadow(self, player):
-        shadow_radius = 12
-        shadow = pygame.Surface((shadow_radius * 2, shadow_radius * 2), pygame.SRCALPHA)
-        pygame.draw.circle(shadow, (0, 0, 0, 100), (shadow_radius, shadow_radius), shadow_radius)
-        self.screen.blit(shadow, (player.position[0] - shadow_radius, player.position[1] - shadow_radius))
-
-    def __show_main_menu(self):
-        # clearing screen
-        self.screen.fill(BLACK)
-        # Display main menu options
-        font = pygame.font.SysFont("Comic Sans", 40)
-        new_game_text = font.render("> New Game" if self.selected_menu_index == 0 else "New Game" , True, WHITE if self.selected_menu_index == 0 else GRAY)
-        quit_text = font.render("> Quit" if self.selected_menu_index == 1 else "Quit", True, WHITE if self.selected_menu_index == 1 else GRAY)
-
-        # Calculate option positions
-        new_game_pos = (self.WIDTH // 2 - new_game_text.get_width() // 2, self.HEIGHT // 2 - new_game_text.get_height())
-        quit_pos = (self.WIDTH // 2 - quit_text.get_width() // 2, self.HEIGHT // 2)
-
-        # Display options on the screen
-        self.screen.blit(new_game_text, new_game_pos)
-        self.screen.blit(quit_text, quit_pos)
-
-    def __show_pause_menu(self):
-        # Display pause menu options
-        font = pygame.font.SysFont("Comic Sans", 40)
-        play_text = font.render("> Play"  if self.selected_menu_index == 0 else "Play", True, WHITE if self.selected_menu_index == 0 else GRAY)
-        new_game_text = font.render("> New Game" if self.selected_menu_index == 1 else "New Game", True, WHITE if self.selected_menu_index == 1 else GRAY)
-        quit_text = font.render("> Quit" if self.selected_menu_index == 2  else "Quit", True, WHITE if self.selected_menu_index == 2 else GRAY)
-
-        # Calculate option positions
-        play_pos = (self.WIDTH // 2 - play_text.get_width() // 2, self.HEIGHT // 2 - play_text.get_height())
-        new_game_pos = (self.WIDTH // 2 - new_game_text.get_width() // 2, self.HEIGHT // 2)
-        quit_pos = (self.WIDTH // 2 - quit_text.get_width() // 2, self.HEIGHT // 2 + quit_text.get_height())
-
-        # Display options on the screen
-        self.screen.blit(play_text, play_pos)
-        self.screen.blit(new_game_text, new_game_pos)
-        self.screen.blit(quit_text, quit_pos)
 
     def __handle_menu_selection(self):
         # in side main menu
@@ -374,10 +307,83 @@ class Game:
             elif self.selected_menu_index == 2:
                 pygame.quit()
 
-    def new_game(self):
-        self.chaser_score = 0
-        self.chased_score = 0
-        self.CHASER = Chaser(game=self, color=RED, speed=CHASER_SPEED)
-        self.CHASED = Player(game=self, position=CHASED_INITIAL_POSITION, color=BLUE, speed=CHASED_SPEED)
-        self.main_menu = False
-        self.pause_menu = False
+
+    def __draw_bottom_fence(self):
+        for i in range(0, 800 - right_offset, fence_gap):
+            self.screen.blit(pygame.transform.scale(fence_wood, (50, 50)),(i, 550))
+            # rectangular shadow
+            shadow = pygame.Surface((15, 5))
+            shadow = pygame.transform.rotate(shadow, 45)
+            shadow.set_alpha(100)
+            shadow.fill((0, 0, 0))
+            self.screen.blit(shadow, (i, 550))
+
+
+    def __dispay_panel(self):
+        # Display scores
+        font = pygame.font.SysFont("Comic Sans", 30)
+        chaser_score_text = font.render(f"Chaser Score: {self.chaser_score}", True, WHITE)
+        chased_score_text = font.render(f"Chased Score: {self.chased_score}", True, WHITE)
+        self.screen.blit(chaser_score_text, (10, 5))
+        self.screen.blit(chased_score_text, (10, 50))
+
+        # display controls
+        font = pygame.font.SysFont("Comic Sans", 15)
+        controls_text = font.render("Chaser Controls: WASD, Chased Controls: Arrow Keys, ESC to quit", True, WHITE)
+        controls_text_area = controls_text.get_rect()
+        controls_text_area.center = ( self.screen.get_rect().width //2 + 85, 15)
+        self.screen.blit(controls_text, controls_text_area)
+
+
+    def __show_pause_menu(self):
+        # Display pause menu options
+        font = pygame.font.SysFont("Comic Sans", 40)
+        play_text = font.render("> Play"  if self.selected_menu_index == 0 else "Play", True, WHITE if self.selected_menu_index == 0 else GRAY)
+        new_game_text = font.render("> New Game" if self.selected_menu_index == 1 else "New Game", True, WHITE if self.selected_menu_index == 1 else GRAY)
+        quit_text = font.render("> Quit" if self.selected_menu_index == 2  else "Quit", True, WHITE if self.selected_menu_index == 2 else GRAY)
+
+        # Calculate option positions
+        play_pos = (self.WIDTH // 2 - play_text.get_width() // 2, self.HEIGHT // 2 - play_text.get_height())
+        new_game_pos = (self.WIDTH // 2 - new_game_text.get_width() // 2, self.HEIGHT // 2)
+        quit_pos = (self.WIDTH // 2 - quit_text.get_width() // 2, self.HEIGHT // 2 + quit_text.get_height())
+
+        # Display options on the screen
+        self.screen.blit(play_text, play_pos)
+        self.screen.blit(new_game_text, new_game_pos)
+        self.screen.blit(quit_text, quit_pos)
+
+
+    def __draw_obstacles(self):
+        for circular_obstacle in obstacles:
+            self.screen.blit(pygame.transform.scale(tree, (60, 80)), (circular_obstacle.centerx - 35, circular_obstacle.centery - 60))
+
+
+    def __draw_tree_shadows(self):
+        for circular_obstacle in obstacles:
+            shadow_radius = 25
+            shadow = pygame.Surface((shadow_radius * 2, shadow_radius * 2), pygame.SRCALPHA)
+            pygame.draw.circle(shadow, (0, 0, 0, 100), (shadow_radius, shadow_radius), shadow_radius)
+            self.screen.blit(shadow, (circular_obstacle.centerx - shadow_radius, circular_obstacle.centery - shadow_radius))
+
+    def __draw_player_shadow(self, player: Player):
+        shadow_radius = 12
+        shadow = pygame.Surface((shadow_radius * 2, shadow_radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(shadow, (0, 0, 0, 100), (shadow_radius, shadow_radius), shadow_radius)
+        self.screen.blit(shadow, (player.position[0] - shadow_radius, player.position[1] - shadow_radius))
+
+
+    def __show_main_menu(self):
+        # clearing screen
+        self.screen.fill(BLACK)
+        # Display main menu options
+        font = pygame.font.SysFont("Comic Sans", 40)
+        new_game_text = font.render("> New Game" if self.selected_menu_index == 0 else "New Game" , True, WHITE if self.selected_menu_index == 0 else GRAY)
+        quit_text = font.render("> Quit" if self.selected_menu_index == 1 else "Quit", True, WHITE if self.selected_menu_index == 1 else GRAY)
+
+        # Calculate option positions
+        new_game_pos = (self.WIDTH // 2 - new_game_text.get_width() // 2, self.HEIGHT // 2 - new_game_text.get_height())
+        quit_pos = (self.WIDTH // 2 - quit_text.get_width() // 2, self.HEIGHT // 2)
+
+        # Display options on the screen
+        self.screen.blit(new_game_text, new_game_pos)
+        self.screen.blit(quit_text, quit_pos)

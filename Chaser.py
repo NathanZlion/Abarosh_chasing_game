@@ -9,6 +9,7 @@ class Chaser(Player):
         self.pic = char2_left
         self.direction = LEFT
 
+
     def move(self, direction):
         self.direction = direction
 
@@ -29,6 +30,7 @@ class Chaser(Player):
         # CHECK IF THE PLAYER IS MOVING OUT OF THE SCREEN and also it he's moving into safe zones
         if self.canMove(nextPosition) and super().isInbound(nextPosition):
             self.position = nextPosition
+
 
     def canMove(self, nextPosition):
         if not super().canMove(nextPosition):
