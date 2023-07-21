@@ -365,7 +365,6 @@ class Game:
             pygame.draw.circle(shadow, (0, 0, 0, 100), (shadow_radius, shadow_radius), shadow_radius)
             self.screen.blit(shadow, (circular_obstacle.centerx - shadow_radius, circular_obstacle.centery - shadow_radius))
 
-
     def __draw_player_shadow(self, player: Player):
         shadow_radius = 12
         shadow = pygame.Surface((shadow_radius * 2, shadow_radius * 2), pygame.SRCALPHA)
