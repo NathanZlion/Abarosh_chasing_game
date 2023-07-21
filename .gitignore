@@ -11,6 +11,5 @@ __pycache__/    # Python bytecode (compiled Python code)
 # for python virtual environment
 venv/
 # for python package files
-dist/
 build/
 *.egg-info/
